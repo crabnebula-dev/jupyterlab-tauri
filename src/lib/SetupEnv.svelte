@@ -1,20 +1,57 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/tauri";
+  import { invoke, transformCallback } from "@tauri-apps/api/tauri";
+  import { relaunch } from "@tauri-apps/api/process";
   import { Circle } from "svelte-loading-spinners";
 
   let installPath = window.__PYTHON_ENV_INSTALL_PATH__;
   let installing = false;
-  let error = "";
+  let output = [];
+
+  type Event =
+    | { event: "Stdout" | "Stderr" | "Error"; payload: string }
+    | { event: "Exit"; payload: number };
 
   async function installAndRestart() {
     installing = true;
-    error = "";
+    output = [];
     try {
-      const _cancelled = await invoke("install_and_restart");
+      const cb = transformCallback((message: Event) => {
+        const { event, payload } = message;
+        console.log(event, payload);
+        switch (event) {
+          case "Stdout":
+            output = [...output, payload];
+            break;
+          case "Stderr":
+            if (payload.endsWith("\r")) {
+              if (output.length) {
+                output[output.length - 1] = payload;
+              } else {
+                output = [...output, payload];
+              }
+            }
+            break;
+          case "Error":
+            output = [...output, payload];
+            installing = false;
+            break;
+          case "Exit":
+            installing = false;
+            if (payload) {
+              output = [
+                ...output,
+                `Installation failed with exit code ${payload}`,
+              ];
+            } else {
+              relaunch();
+            }
+            break;
+        }
+      });
+      await invoke("run_installer", { onEventFn: cb });
     } catch (e) {
-      error = e;
+      output = [...output, e];
     }
-    installing = false;
   }
 </script>
 
@@ -29,11 +66,13 @@
     </button>
   </div>
 
-  {#if error}
-    <div>
-      {error}
-    </div>
-  {/if}
+  <div class="output">
+    {#each output as line}
+      <div>
+        {line}
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>

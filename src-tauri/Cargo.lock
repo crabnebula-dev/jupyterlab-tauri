@@ -1226,6 +1226,7 @@ dependencies = [
  "portpicker",
  "rand 0.8.5",
  "semver 1.0.16",
+ "serde",
  "tauri",
  "tauri-build",
 ]

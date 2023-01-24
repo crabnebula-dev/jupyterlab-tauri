@@ -1,10 +1,26 @@
-use std::{fs::remove_dir_all, path::PathBuf, process::Command};
+use std::{
+    fs::remove_dir_all,
+    io::{BufReader, Read},
+    path::PathBuf,
+    process::{Command, Stdio},
+    sync::Arc,
+};
 
 use crate::python_env::PythonEnvCommand;
 use semver::Version;
-use tauri::{AppHandle, Window};
+use serde::Serialize;
+use tauri::{api::ipc::CallbackFn, AppHandle, Window};
 
 const REQUIRED_JUPYTERLAB_VERSION: Version = Version::new(3, 4, 5);
+
+#[derive(Serialize)]
+#[serde(tag = "event", content = "payload")]
+enum InstallEvent {
+    Exit(i32),
+    Error(String),
+    Stdout(String),
+    Stderr(String),
+}
 
 pub fn is_python_env_valid(app: &AppHandle) -> bool {
     let env_path = install_path(app);
@@ -57,7 +73,11 @@ pub fn install_path(app: &AppHandle) -> PathBuf {
         .join("jupyterServer")
 }
 
-pub fn run_installer(app: &AppHandle, window: &Window) -> crate::Result<bool> {
+pub fn run_installer(
+    app: &AppHandle,
+    window: Window,
+    on_event_fn: CallbackFn,
+) -> crate::Result<bool> {
     let platform = if cfg!(target_os = "linux") {
         "Linux"
     } else if cfg!(target_os = "macos") {
@@ -91,7 +111,7 @@ pub fn run_installer(app: &AppHandle, window: &Window) -> crate::Result<bool> {
 
     if install_path.exists() {
         let confirmed = tauri::api::dialog::blocking::confirm(
-            Some(window),
+            Some(&window),
             "Do you want to overwrite?",
             format!(
                 "Install path ({}) is not empty. Would you like to overwrite it?",
@@ -111,14 +131,61 @@ pub fn run_installer(app: &AppHandle, window: &Window) -> crate::Result<bool> {
         install_path.display()
     );
 
-    let status = Command::new(&installer_path)
+    let mut child = Command::new(&installer_path)
         .args(["-b", "-p"])
         .arg(&install_path)
-        .status()?;
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
 
-    if status.success() {
-        app.restart();
-    }
+    let emit_event = move |event: InstallEvent| {
+        let js = tauri::api::ipc::format_callback(on_event_fn, &event)
+            .expect("unable to serialize CommandEvent");
+        let _ = window.eval(&js);
+    };
+    let emit_event = Arc::new(emit_event);
+    let emit_event_ = emit_event.clone();
+    let emit_event__ = emit_event.clone();
+
+    spawn_pipe_reader(child.stdout.take().unwrap(), move |event| {
+        emit_event(InstallEvent::Stdout(event))
+    });
+    spawn_pipe_reader(child.stderr.take().unwrap(), move |event| {
+        emit_event_(InstallEvent::Stderr(event))
+    });
+
+    std::thread::spawn(move || match child.wait() {
+        Ok(status) => {
+            emit_event__(InstallEvent::Exit(status.code().unwrap_or_default()));
+        }
+        Err(err) => {
+            emit_event__(InstallEvent::Error(err.to_string()));
+        }
+    });
 
     Ok(true)
+}
+
+fn spawn_pipe_reader<R, F>(stream: R, f: F)
+where
+    R: Read + Send + 'static,
+    F: Fn(String) + Send + 'static,
+{
+    let mut reader = BufReader::new(stream);
+    std::thread::spawn(move || loop {
+        let mut buf = Vec::new();
+        match tauri::utils::io::read_line(&mut reader, &mut buf) {
+            Err(err) => {
+                eprintln!("Error reading from stream: {err}");
+                break;
+            }
+            Ok(size) => {
+                if size == 0 {
+                    break;
+                } else {
+                    f(String::from_utf8_lossy(&buf).into_owned());
+                }
+            }
+        }
+    });
 }

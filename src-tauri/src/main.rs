@@ -12,7 +12,10 @@ use std::{
 use anyhow::Result;
 use installer::install_path;
 use tauri::{
-    api::http::{ClientBuilder, HttpRequestBuilder},
+    api::{
+        http::{ClientBuilder, HttpRequestBuilder},
+        ipc::CallbackFn,
+    },
     AppHandle, Manager, RunEvent, Window, WindowBuilder,
 };
 
@@ -51,9 +54,13 @@ impl JupyterProcess {
 }
 
 #[tauri::command]
-async fn install_and_restart(app: AppHandle, window: Window) -> Result<(), String> {
+async fn run_installer(
+    app: AppHandle,
+    window: Window,
+    on_event_fn: CallbackFn,
+) -> Result<(), String> {
     if window.label() == "init" {
-        installer::run_installer(&app, &window).map_err(|e| e.to_string())?;
+        installer::run_installer(&app, window, on_event_fn).map_err(|e| e.to_string())?;
     }
     Ok(())
 }
@@ -65,7 +72,7 @@ fn main() {
     let _ = fix_path_env::fix();
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![install_and_restart])
+        .invoke_handler(tauri::generate_handler![run_installer])
         .setup(|app| {
             let handle = app.handle();
             if installer::is_python_env_valid(&handle) {

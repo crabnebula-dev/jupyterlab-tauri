@@ -15,7 +15,8 @@ tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
 anyhow = "1"
-tauri = { version = "1.2", features = ["dialog", "http-api"] }
+serde = "1"
+tauri = { version = "1.2", features = ["dialog", "http-api", "process-relaunch"] }
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 portpicker = "0.1"
 rand = "0.8"
