@@ -12,8 +12,10 @@ use std::{
 use anyhow::Result;
 use tauri::{
     api::http::{ClientBuilder, HttpRequestBuilder},
-    AppHandle, Manager, RunEvent, WindowBuilder,
+    AppHandle, Manager, RunEvent, Window, WindowBuilder,
 };
+
+mod installer;
 
 struct JupyterProcess {
     child: Mutex<Child>,
@@ -44,6 +46,14 @@ impl JupyterProcess {
     }
 }
 
+#[tauri::command]
+async fn install_and_restart(app: AppHandle, window: Window) -> Result<(), String> {
+    if window.label() == "init" {
+        installer::run_installer(&app, &window).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 fn main() {
     // On macOS and Linux the PATH env variable a packaged app gets does not
     // contain all the information that is usually set in .bashrc, .bash_profile, etc.
@@ -51,17 +61,21 @@ fn main() {
     let _ = fix_path_env::fix();
 
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![install_and_restart])
         .setup(|app| {
-            let port = portpicker::pick_unused_port()
-                .ok_or_else(|| anyhow::anyhow!("failed to pick unused port"))?;
-            let token = rand::random::<usize>().to_string();
+            let handle = app.handle();
+            if installer::is_python_env_valid(&handle) {
+                bootstrap_jupyterlab(handle)?;
+            } else {
+                WindowBuilder::new(app, "init", Default::default())
+                    .title("JupyterLab - Setup Python Env")
+                    .initialization_script(&format!(
+                        "window.__PYTHON_ENV_INSTALL_PATH__ = {:?}",
+                        installer::install_path(&handle)
+                    ))
+                    .build()?;
+            }
 
-            let child = start_jupyter_lab(app.handle(), port, token.clone())?;
-            app.manage(JupyterProcess {
-                child: Mutex::new(child),
-                port,
-                token,
-            });
             Ok(())
         })
         .build(tauri::generate_context!())
@@ -74,7 +88,22 @@ fn main() {
         });
 }
 
-fn start_jupyter_lab(app: AppHandle, port: u16, token: String) -> Result<Child> {
+fn bootstrap_jupyterlab(app: AppHandle) -> Result<()> {
+    let port = portpicker::pick_unused_port()
+        .ok_or_else(|| anyhow::anyhow!("failed to pick unused port"))?;
+    let token = rand::random::<usize>().to_string();
+
+    let child = run_jupyterlab(app.clone(), port, token.clone())?;
+    app.manage(JupyterProcess {
+        child: Mutex::new(child),
+        port,
+        token,
+    });
+
+    Ok(())
+}
+
+fn run_jupyterlab(app: AppHandle, port: u16, token: String) -> Result<Child> {
     let mut child = Command::new("python")
         .args([
             "-m",

@@ -6,3 +6,9 @@ const app = new App({
 });
 
 export default app;
+
+declare global {
+  interface Window {
+    __PYTHON_ENV_INSTALL_PATH__: string;
+  }
+}
