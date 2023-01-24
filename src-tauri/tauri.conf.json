@@ -8,7 +8,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "jupyter-tauri",
+    "productName": "JupyterLab",
     "version": "0.1.0"
   },
   "tauri": {
