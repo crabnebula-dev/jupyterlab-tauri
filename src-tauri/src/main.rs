@@ -10,12 +10,16 @@ use std::{
 };
 
 use anyhow::Result;
+use installer::install_path;
 use tauri::{
     api::http::{ClientBuilder, HttpRequestBuilder},
     AppHandle, Manager, RunEvent, Window, WindowBuilder,
 };
 
 mod installer;
+mod python_env;
+
+use python_env::PythonEnvCommand;
 
 struct JupyterProcess {
     child: Mutex<Child>,
@@ -104,7 +108,11 @@ fn bootstrap_jupyterlab(app: AppHandle) -> Result<()> {
 }
 
 fn run_jupyterlab(app: AppHandle, port: u16, token: String) -> Result<Child> {
-    let mut child = Command::new("python")
+    let mut cmd = Command::new("python");
+    if let Some(home) = tauri::api::path::home_dir() {
+        cmd.current_dir(&home);
+    }
+    let mut child = cmd
         .args([
             "-m",
             "jupyterlab",
@@ -118,6 +126,7 @@ fn run_jupyterlab(app: AppHandle, port: u16, token: String) -> Result<Child> {
             "--ContentsManager.allow_hidden=True",
         ])
         .env("JUPYTER_TOKEN", &token)
+        .add_env_to_path(&install_path(&app))
         .stderr(Stdio::piped())
         .spawn()?;
 

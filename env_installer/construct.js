@@ -29,6 +29,9 @@ switch (arch) {
   case 'x86_64':
     platformArch = '64'
     break
+  case 'aarch64':
+    platformArch = 'arm64'
+    break
   default:
     platformArch = arch
 }
