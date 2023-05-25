@@ -6,6 +6,8 @@ A desktop application for [JupyterLab](https://github.com/jupyterlab/jupyterlab)
 
 - [conda](https://docs.conda.io)
 
+  Install version 22.11.1 from the [archive](https://repo.anaconda.com/miniconda/).
+
 - [(conda) Constructor](https://github.com/conda/constructor) to bundle JupyterLab Desktop Server into the stand-alone application. You can install Constructor using:
 
   ```bash
