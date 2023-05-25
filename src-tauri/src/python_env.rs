@@ -27,6 +27,7 @@ fn path_with_python_env(env_path: &Path) -> crate::Result<OsString> {
 }
 
 pub trait PythonEnvCommand {
+    /// Adds the given Python environment path to the `PATH`.
     fn add_env_to_path(&mut self, env_path: &Path) -> &mut Self;
 }
 

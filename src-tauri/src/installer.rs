@@ -22,6 +22,7 @@ enum InstallEvent {
     Stderr(String),
 }
 
+/// Checks if the JupyterLab is installed in the custom Python env path.
 pub fn is_python_env_valid(app: &AppHandle) -> bool {
     let env_path = install_path(app);
     if !env_path.exists() {
@@ -35,7 +36,7 @@ pub fn is_python_env_valid(app: &AppHandle) -> bool {
     {
         Ok(output) => {
             let version_str = String::from_utf8_lossy(&output.stdout);
-            if let Ok(version) = semver::Version::parse(&version_str.trim()) {
+            if let Ok(version) = semver::Version::parse(version_str.trim()) {
                 let valid = version > REQUIRED_JUPYTERLAB_VERSION;
                 if !valid {
                     eprintln!("jupyterlab version {version_str} does not match required {REQUIRED_JUPYTERLAB_VERSION}");
@@ -55,6 +56,7 @@ pub fn is_python_env_valid(app: &AppHandle) -> bool {
     }
 }
 
+/// Installer path is `$HOME/Library/org.jupyter.lab/jupyterServer` on macOS.
 #[cfg(target_os = "macos")]
 pub fn install_path(app: &AppHandle) -> PathBuf {
     tauri::api::path::home_dir()
@@ -64,6 +66,9 @@ pub fn install_path(app: &AppHandle) -> PathBuf {
         .join("jupyterServer")
 }
 
+/// Installer path:
+/// - `$XDG_DATA_HOME/org.jupyter.lab/jupyterServer` or `$HOME/.local/share/org.jupyter.lab/jupyterServer` or `$HOME/jupyterServer` on Linux.
+/// `{FOLDERID_LocalAppData}/org.jupyter.lab/jupyterServer` or `{FOLDERID_Profile}/jupyterServer` on Windows.
 #[cfg(not(target_os = "macos"))]
 pub fn install_path(app: &AppHandle) -> PathBuf {
     app.path_resolver()
@@ -73,6 +78,7 @@ pub fn install_path(app: &AppHandle) -> PathBuf {
         .join("jupyterServer")
 }
 
+/// Executes the installer.
 pub fn run_installer(
     app: &AppHandle,
     window: Window,

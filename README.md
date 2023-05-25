@@ -2,6 +2,11 @@
 
 A desktop application for [JupyterLab](https://github.com/jupyterlab/jupyterlab), based on [Tauri](https://tauri.app/).
 
+The application installs JupyterLab on its own Python environment. The env path is:
+- `$HOME/Library/org.jupyter.lab/jupyterServer` on macOS.
+- `$XDG_DATA_HOME/org.jupyter.lab/jupyterServer` or `$HOME/.local/share/org.jupyter.lab/jupyterServer` or `$HOME/jupyterServer` on Linux.
+- `{FOLDERID_LocalAppData}/org.jupyter.lab/jupyterServer` or `{FOLDERID_Profile}/jupyterServer` on Windows.
+
 ## Build dependencies
 
 - [conda](https://docs.conda.io)
@@ -29,4 +34,3 @@ A desktop application for [JupyterLab](https://github.com/jupyterlab/jupyterlab)
   ```bash
   npm install --global yarn
   ```
-
