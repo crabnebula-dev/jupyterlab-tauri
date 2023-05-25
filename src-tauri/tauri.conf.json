@@ -1,8 +1,7 @@
 {
   "build": {
-    "beforeDevCommand": "yarn dev",
-    "beforeBuildCommand": "yarn build",
-    "beforeBundleCommand": "node ./env_installer/construct.js",
+    "beforeDevCommand": "node ./env_installer/construct.js && yarn dev",
+    "beforeBuildCommand": "node ./env_installer/construct.js && yarn build",
     "devPath": "http://localhost:1420",
     "distDir": "../dist",
     "withGlobalTauri": false
