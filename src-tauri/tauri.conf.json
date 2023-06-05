@@ -41,9 +41,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [
-        "./JupyterLabDesktopAppServer*"
-      ],
+      "resources": [],
       "shortDescription": "",
       "targets": "all",
       "windows": {

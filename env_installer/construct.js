@@ -1,6 +1,6 @@
 // example usage: node ./env_installer/construct.js linux x86_64
 
-import { spawn } from 'child_process'
+/*import { spawn } from 'child_process'
 import * as url from 'url'
 import path from 'path'
 
@@ -39,3 +39,4 @@ switch (arch) {
 console.log(`Building installer for ${platformName}-${platformArch}`)
 
 spawn('constructor', [__dirname, `--platform=${platformName}-${platformArch}`, '--output-dir', path.resolve(__dirname, '../src-tauri')], { stdio: 'inherit' })
+*/
