@@ -19,26 +19,27 @@ const appName = buildConfig.name || process.argv[4];
 const appVersion = buildConfig.version || process.argv[5];
 
 let platformName = "";
-let platformBuildName = "";
+let outputPlatformBuildName = "";
 
 switch (platform) {
   case "macos":
     platformName = "osx";
-    platformBuildName = "MacOSX";
+    outputPlatformBuildName = "MacOSX";
     break;
   case "windows":
     platformName = "win";
-    platformBuildName = "Windows";
+    outputPlatformBuildName = "Windows";
     break;
   case "linux":
     platformName = platform;
-    platformBuildName = "Linux";
+    outputPlatformBuildName = "Linux";
     break;
   default:
     platformName = platform;
 }
 
 let platformArch = "";
+let outputPlatformArch = arch;
 switch (arch) {
   case "x86":
     platformArch = "32";
@@ -47,17 +48,17 @@ switch (arch) {
     platformArch = "64";
     break;
   case "aarch64":
-    platformArch = "arm64";
+    platformArch = outputPlatformArch = "arm64";
     break;
   default:
     platformArch = arch;
 }
 
-console.log(`Check if installer for ${platformName}-${platformArch} exists`);
+console.log(`Checking if installer for ${platformName}-${outputPlatformArch} exists`);
 
 let ext = platform === "windows" ? "exe" : "sh";
 
-let installerPath = `../src-tauri/${appName}-${appVersion}-${platformBuildName}-${arch}.${ext}`;
+let installerPath = `../src-tauri/${appName}-${appVersion}-${outputPlatformBuildName}-${outputPlatformArch}.${ext}`;
 
 console.log("Installer path:", installerPath);
 
