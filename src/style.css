@@ -18,3 +18,7 @@
   user-select: none;
   word-wrap: break-word;
 }
+
+body {
+  height: 100vh;
+}

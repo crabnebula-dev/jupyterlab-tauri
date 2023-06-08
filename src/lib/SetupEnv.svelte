@@ -63,7 +63,9 @@
   </div>
   <div class="main">
     <h1>Getting started</h1>
-    <p>Failed to find a compatible Python environment at the configured path:</p>
+    <p>
+      Failed to find a compatible Python environment at the configured path:
+    </p>
     <p>"<i>{installPath}</i>"</p>
     <p><strong>Please try to intall it</strong></p>
     <button disabled={installing} class="install" on:click={installAndRestart}>
@@ -74,33 +76,33 @@
       <div class="output">
         <h2>Console Output:</h2>
         {#each output as line}
-            <p><i>{line}</i></p>
+          <p><i>{line}</i></p>
         {/each}
       </div>
     {/if}
   </div>
 
   <dialog open={installing}>
-    <h1>
-      Installing Python Environment...
-    </h1>
+    <h1>Installing Python Environment...</h1>
     <div class="circle">
       <span>
         <Circle size="40" />
       </span>
     </div>
     <p>
-      <i>Do not close this window, the application will restart after a successfull install. This may take a couple of minutes.</i>
+      <i
+        >Do not close this window, the application will restart after a
+        successfull install. This may take a couple of minutes.</i
+      >
     </p>
     {#if output.length > 0}
       <div class="output">
         <h2>Console Output:</h2>
         {#each output as line}
-            <p><i>{line}</i></p>
+          <p><i>{line}</i></p>
         {/each}
       </div>
     {/if}
-
   </dialog>
 </div>
 
@@ -117,12 +119,17 @@
     display: flex;
     flex-direction: column;
     align-items: left;
-    gap: 4rem;
-    padding: 4rem;
+    gap: 2rem;
+    padding: 2rem;
     position: relative;
   }
+  .main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
   .main h1 {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     margin-top: 0;
   }
   button.install img {
@@ -171,7 +178,7 @@
     margin-bottom: 3rem;
     text-align: center;
     line-height: 1;
-    }
+  }
 
   .circle {
     display: flex;
@@ -191,6 +198,9 @@
     border: 2px solid #424242;
     border-radius: 8px;
     padding: 1rem;
+    overflow: auto;
+    flex: 1;
+    max-height: 200px;
   }
 
   .output h2 {
