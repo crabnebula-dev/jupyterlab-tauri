@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsString,
     fs::remove_dir_all,
     io::{BufReader, Read},
     path::PathBuf,
@@ -137,30 +138,25 @@ pub fn run_installer(
         install_path.display()
     );
 
-    let mut child = if cfg!(windows) {  
-        Command::new("cmd.exe")
-            .args([
-                "/c", 
-                "start", 
-                "/wait", 
-                &installer_path.clone().into_os_string().into_string().expect("string conversion").as_str(), 
-                "/InstallationType=JustMe", 
-                "/AddToPath=0", 
-                "/S",
-                &format!("{}{}", "/D=", &install_path.clone().into_os_string().into_string().expect("string conversion").as_str())
-                ])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped()) 
-            .spawn()?
-    } else { 
+    let mut child = if cfg!(windows) {
+        let mut cmd = Command::new("cmd.exe");
+        cmd.args(["/c", "start", "/wait"]);
+        cmd.arg(installer_path);
+
+        cmd.args(["/InstallationType=JustMe", "/AddToPath=0", "/S"]);
+
+        let mut install_path_arg = OsString::new();
+        install_path_arg.push("/D=");
+        install_path_arg.push(&install_path);
+        cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?
+    } else {
         Command::new(&installer_path)
-            .args(["-b", "-p"]  )
+            .args(["-b", "-p"])
             .arg(&install_path)
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped()) 
+            .stderr(Stdio::piped())
             .spawn()?
     };
-    
 
     let emit_event = move |event: InstallEvent| {
         let js = tauri::api::ipc::format_callback(on_event_fn, &event)
