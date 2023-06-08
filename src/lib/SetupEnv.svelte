@@ -70,6 +70,14 @@
       <img alt="Python Logo" width="30" src={pythonLogo} />
       Install and restart
     </button>
+    {#if output.length > 0}
+      <div class="output">
+        <h2>Console Output:</h2>
+        {#each output as line}
+            <p><i>{line}</i></p>
+        {/each}
+      </div>
+    {/if}
   </div>
 
   <dialog open={installing}>
@@ -84,13 +92,15 @@
     <p>
       <i>Do not close this window, the application will restart after a successfull install. This may take a couple of minutes.</i>
     </p>
-    <div class="output">
-      {#each output as line}
-        <div>
-          {line}
-        </div>
-      {/each}
-    </div>
+    {#if output.length > 0}
+      <div class="output">
+        <h2>Console Output:</h2>
+        {#each output as line}
+            <p><i>{line}</i></p>
+        {/each}
+      </div>
+    {/if}
+
   </dialog>
 </div>
 
@@ -130,6 +140,7 @@
     background-color: transparent;
     font-size: 18px;
     padding: 0.5rem;
+    margin-bottom: 2rem;
   }
   button:disabled {
     filter: blur(1px);
@@ -174,5 +185,18 @@
 
   dialog::backdrop {
     background-color: black;
+  }
+
+  .output {
+    border: 2px solid #424242;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .output h2 {
+    margin-top: 0.5rem;
+  }
+  .output p {
+    font-size: 18px;
   }
 </style>
