@@ -72,8 +72,8 @@
       Install and restart
     </button>
     {#if output.length > 0}
+      <h2>Console Output:</h2>
       <div class="output">
-        <h2>Console Output:</h2>
         {#each output as line}
           <p><i>{line}</i></p>
         {/each}
@@ -95,8 +95,8 @@
       >
     </p>
     {#if output.length > 0}
+      <h2>Console Output:</h2>
       <div class="output">
-        <h2>Console Output:</h2>
         {#each output as line}
           <p><i>{line}</i></p>
         {/each}
@@ -121,6 +121,8 @@
     gap: 2rem;
     padding: 2rem;
     position: relative;
+    max-width: 620px;
+    margin: 0 auto;
   }
   .main {
     display: flex;
@@ -166,7 +168,7 @@
     -ms-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
     padding: 4rem 4rem;
-    width: 60%;
+    width: 70%;
     background-color: #424242;
     box-shadow: 0 0 79px #424242;
     color: white;
@@ -198,8 +200,13 @@
     border-radius: 8px;
     padding: 1rem;
     overflow: auto;
-    flex: 1;
-    max-height: 200px;
+    height: 200px;
+    word-break: break-all;
+    word-wrap: break-word;
+  }
+
+  dialog .output {
+    border-color: white;
   }
 
   .output h2 {
