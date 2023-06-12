@@ -19,7 +19,6 @@
     try {
       const cb = transformCallback((message: Event) => {
         const { event, payload } = message;
-        console.log(event, payload);
         switch (event) {
           case "Stdout":
             output = [...output, payload];
