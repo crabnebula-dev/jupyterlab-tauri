@@ -168,7 +168,7 @@
     -ms-transform: translateX(-50%) translateY(-50%);
     transform: translateX(-50%) translateY(-50%);
     padding: 4rem 4rem;
-    width: 70%;
+    width: 75%;
     background-color: #424242;
     box-shadow: 0 0 79px #424242;
     color: white;
