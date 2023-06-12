@@ -5,3 +5,10 @@
 <main class="container">
   <SetupEnv />
 </main>
+
+<style>
+  .container {
+    min-height: 100vh;
+    display: flex;
+  }
+</style>

@@ -122,7 +122,15 @@
     padding: 2rem;
     position: relative;
     max-width: 620px;
-    margin: 0 auto;
+    margin: auto;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+  }
+  
+  .logo img {
+    max-width: 300px;
+    width: 100%;
   }
   .main {
     display: flex;
