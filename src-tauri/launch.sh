@@ -23,29 +23,21 @@ echo area: "${1}"
 echo project: "${2}"
 echo 
 
+PYTHONPATH="${GPYTHON_SP}"
+PYTHONPATH="${GEN_JP_LIBRARIES}/.venv/lib/python3.10/site-packages":${PYTHONPATH}
+PYTHONPATH="${GEN_SH_LIBRARIES}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
 
 if [ "${1}" = "Setup and Signatures" ]
     then 
-    if [ "${2}" = "Shared Libraries" ]
-        then  
-        PYTHONPATH="${GPYTHON_SP}"
-        PYTHONPATH="${GEN_JP_LIBRARIES}/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-        PYTHONPATH="${GEN_SH_LIBRARIES}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-        export PYTHONPATH
-    else
-        PYTHONPATH="${GPYTHON_SP}"
-        PYTHONPATH="${GEN_JP_LIBRARIES}/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-        PYTHONPATH="${GEN_SH_LIBRARIES}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
+    if [ "${2}" != "Shared Libraries" ]
+        then
         PYTHONPATH="${GEN_PROJECTS}/${1}/${2}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-        export PYTHONPATH
-    fi 
+    fi
 else
-    PYTHONPATH="${GPYTHON_SP}"
-    PYTHONPATH="${GEN_JP_LIBRARIES}/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-    PYTHONPATH="${GEN_SH_LIBRARIES}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
     PYTHONPATH="${GEN_PROJECTS}/${1}/${2}/.v/.venv/lib/python3.10/site-packages":${PYTHONPATH}
-    export PYTHONPATH
 fi
+
+export PYTHONPATH
 
 source "${GEN_PROJECTS}/${1}/${2}/.v/.venv/bin/activate" 
 export VIRTUAL_ENV_PROMPT="(.venv)"
