@@ -2,7 +2,7 @@
 
 # Environment vars for paths 
 export GPYTHON_SP="/Library/Frameworks/gpython.framework/Versions/3.10/lib/python3.10/site-packages"
-export GENNAKER="${HOME}/Library/Gennaker"
+export GENNAKER="${HOME}/Library/GennakerTauri"
 export GEN_JP_LIBRARIES="${GENNAKER}/jupyter-libraries"
 export GEN_PROJECTS="${GENNAKER}/projects"
 export GEN_SH_LIBRARIES="${GENNAKER}/projects/Setup and Signatures/Shared Libraries"
