@@ -1,9 +1,9 @@
 <script lang="ts">
-  import SetupEnv from "./lib/SetupEnv.svelte";
+  import Launch from "./lib/Launch.svelte";
 </script>
 
 <main class="container">
-  <SetupEnv />
+  <Launch />
 </main>
 
 <style>

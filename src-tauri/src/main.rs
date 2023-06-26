@@ -3,24 +3,97 @@
     windows_subsystem = "windows"
 )]
 
-use anyhow::Result;
-use tauri::{api::ipc::CallbackFn, AppHandle, Manager, RunEvent, Window, WindowBuilder};
+use std::{collections::HashMap, process::Child, sync::Mutex};
 
-mod installer;
-mod jupyterlab;
-mod python_env;
+use anyhow::Result;
+use rand::{distributions::Alphanumeric, Rng};
+use tauri::{
+    api::http::{ClientBuilder, HttpRequestBuilder},
+    AppHandle, Manager, RunEvent, State, Window, WindowBuilder,
+};
+
+struct JupyterProcess {
+    child: Child,
+    port: u16,
+    token: String,
+}
+
+impl JupyterProcess {
+    pub async fn stop(mut self) -> Result<()> {
+        #[cfg(not(windows))]
+        {
+            let client = ClientBuilder::new().build()?;
+            let request = HttpRequestBuilder::new(
+                "POST",
+                format!(
+                    "http://localhost:${}/api/shutdown?_xsrf=${}",
+                    self.port, self.token
+                ),
+            )?
+            .header("Authorization", format!("token {}", self.token))?;
+            client.send(request).await?;
+        }
+
+        let _ = self.child.kill();
+
+        Ok(())
+    }
+}
+
+struct JupyterProcessStore(Mutex<HashMap<u32, JupyterProcess>>);
 
 #[tauri::command]
-async fn run_installer(
+async fn launch(
     app: AppHandle,
     window: Window,
-    on_event_fn: CallbackFn,
+    store: State<'_, JupyterProcessStore>,
+    area: String,
+    project: String,
 ) -> Result<(), String> {
-    // we run the installer only on the `init` window for securit
+    // we run the installer only on the `init` window for security
     if window.label() == "init" {
-        installer::run_installer(&app, window, on_event_fn).map_err(|e| e.to_string())?;
+        let port = portpicker::pick_unused_port()
+            .ok_or_else(|| "failed to pick unused port".to_string())?;
+        let token = rand::random::<usize>().to_string();
+
+        let child = std::process::Command::new(
+            app.path_resolver()
+                .resolve_resource("launch.sh")
+                .ok_or_else(|| "failed to find resource".to_string())?,
+        )
+        .args([&area, &project])
+        .args([&token])
+        .args([port.to_string()])
+        .spawn()
+        .map_err(|e| format!("failed to run launcher: {e}"))?;
+
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        let _ = WindowBuilder::new(
+            &app,
+            rand::thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(7)
+                .map(char::from)
+                .collect::<String>(),
+            tauri::WindowUrl::External(
+                format!("http://localhost:{port}/lab?token={token}")
+                    .parse()
+                    .unwrap(),
+            ),
+        )
+        .title("JupyterLab")
+        .build();
+
+        store
+            .0
+            .lock()
+            .unwrap()
+            .insert(child.id(), JupyterProcess { child, port, token });
+
+        Ok(())
+    } else {
+        Err("cannot launch on this window".into())
     }
-    Ok(())
 }
 
 fn main() {
@@ -30,27 +103,12 @@ fn main() {
     let _ = fix_path_env::fix();
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![run_installer])
+        .invoke_handler(tauri::generate_handler![launch])
+        .manage(JupyterProcessStore(Default::default()))
         .setup(|app| {
-            let handle = app.handle();
-            if installer::is_python_env_valid(&handle) {
-                // JupyterLab is already installed; let's start it!
-                let port = portpicker::pick_unused_port()
-                    .ok_or_else(|| anyhow::anyhow!("failed to pick unused port"))?;
-                let token = rand::random::<usize>().to_string();
-
-                jupyterlab::run(handle, port, token)?;
-            } else {
-                // JupyterLab is not installed; let's open the installer window
-                WindowBuilder::new(app, "init", Default::default())
-                    .title("JupyterLab - Setup Python Env")
-                    .initialization_script(&format!(
-                        // pass the install path to the UI
-                        "window.__PYTHON_ENV_INSTALL_PATH__ = {:?}",
-                        installer::install_path(&handle)
-                    ))
-                    .build()?;
-            }
+            WindowBuilder::new(app, "init", Default::default())
+                .title("JupyterLab")
+                .build()?;
 
             Ok(())
         })
@@ -59,9 +117,14 @@ fn main() {
         .run(|app, event| {
             if let RunEvent::Exit = event {
                 // stop the JupyterLab server on app exit
-                if let Some(jupyter) = app.try_state::<jupyterlab::JupyterProcess>() {
-                    let _ = tauri::async_runtime::block_on(jupyter.stop());
-                }
+                let store = app.state::<JupyterProcessStore>();
+                let _ = tauri::async_runtime::block_on(async move {
+                    let mut store_ = store.0.lock().unwrap();
+                    let keys = store_.keys().cloned().collect::<Vec<u32>>();
+                    for k in keys {
+                        let _ = store_.remove(&k).unwrap().stop().await;
+                    }
+                });
             }
         });
 }
