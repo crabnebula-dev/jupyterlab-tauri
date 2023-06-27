@@ -1,0 +1,78 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js" integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t" crossorigin="anonymous"></script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+<style>
+/*
+1. CHANGE MARGINS TO FIT 70 CHARS
+2. CHANGE FONT SIZE OF MD
+3. CHANGE LINE HEIGHT OF MD
+4. CHANGE CELL HEIGHT
+*/
+
+@font-face {
+    font-family: 'et-book';
+    src: url('https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/et-book/et-book-roman-line-figures/et-book-roman-line-figures.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* changes to this call will change both input and output cells combined*/
+.lm-Widget.p-Widget.jp-Notebook.jp-mod-scrollPastEnd.jp-NotebookPanel-notebook {
+    padding-left: 15%;
+    padding-right: 25%;
+}
+
+.lm-Widget.p-Widget.jp-RenderedHTMLCommon.jp-RenderedMarkdown.jp-MarkdownOutput {
+    font-size: 20px;
+    font-family: 'et-book', 'Times New Roman', Times, serif;
+    line-height: 26px;
+}
+
+/* .jp-RenderedMarkdown code,  */
+/* pre,  */
+/* .jp-RenderedMarkdown p > code,  */
+/* .jp-RenderedMarkdown code,
+.jp-RenderedMarkdown li > */
+
+.jp-RenderedMarkdown pre {
+    font-size: 0.9rem;
+    line-height: 1.5rem;
+    padding: 1rem;
+    background-color: #f5f5f5 !important;
+}
+
+code {
+    font-size: 0.9rem !important;
+    line-height: 1.5rem;
+    background-color: #f5f5f5 !important;
+}
+
+hr {
+    background: #000;
+    height: 1px;
+    border: 0px;
+}
+
+.lm-Widget.p-Widget.jp-CodeMirrorEditor.jp-Editor.jp-InputArea-editor {
+    background-color: rgba(128, 128, 128, 0.03);
+    /* background-color: white; */
+}
+
+/* The next 2 values change the math font-size for MathJax3 and KaTeX
+to undo the increase relative to the text font that these programs 
+set by default. Using the larger size that Gennaker gives to all 
+fonts, the default increases are jarring.*/
+
+.MathJax_CHTML {
+    scale: 1.0 !important;
+}
+
+.katex {
+    font-size: 1.0em;
+}
+
+</style>

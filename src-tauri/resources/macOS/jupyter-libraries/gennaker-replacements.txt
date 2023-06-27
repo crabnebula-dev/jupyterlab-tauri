@@ -1,0 +1,4 @@
+psutil
+charset_normalizer
+cffi
+PyYAML

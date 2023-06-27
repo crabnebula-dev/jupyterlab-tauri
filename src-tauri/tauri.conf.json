@@ -34,13 +34,14 @@
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
-        "frameworks": [],
+        "frameworks": ["./gpython.framework"],
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [
-        "./launch.sh"
-      ],
+      "resources": {
+        "resources/macOS": ".",
+        "resources/shared": "."
+      },
       "shortDescription": "",
       "targets": "all",
       "windows": {

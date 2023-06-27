@@ -1,0 +1,7 @@
+{
+  "disabledExtensions": {
+    "nbdime-jupyterlab": true,
+    "@jupyterlab/git": true,
+    "@jupyterlab/katex-extension": true
+  }
+}

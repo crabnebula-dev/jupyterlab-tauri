@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Environment vars for paths 
-export GPYTHON_SP="/Library/Frameworks/gpython.framework/Versions/3.10/lib/python3.10/site-packages"
+# Environment vars for paths
+export GPYTHON_SP="${GPYTHON_FRAMEWORK_PATH}/Versions/3.10/lib/python3.10/site-packages"
 export GENNAKER="${HOME}/Library/GennakerTauri"
 export GEN_JP_LIBRARIES="${GENNAKER}/jupyter-libraries"
 export GEN_PROJECTS="${GENNAKER}/projects"

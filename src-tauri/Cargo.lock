@@ -667,6 +667,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
+
+[[package]]
 name = "futf"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1391,6 +1397,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "fix-path-env",
+ "fs_extra",
  "portpicker",
  "rand 0.8.5",
  "semver 1.0.16",
@@ -2775,8 +2782,7 @@ dependencies = [
 [[package]]
 name = "tauri"
 version = "1.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fbe522898e35407a8e60dc3870f7579fea2fc262a6a6072eccdd37ae1e1d91e"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "anyhow",
  "bytes",
@@ -2822,8 +2828,7 @@ dependencies = [
 [[package]]
 name = "tauri-build"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d2edd6a259b5591c8efdeb9d5702cb53515b82a6affebd55c7fd6d3a27b7d1b"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -2839,8 +2844,7 @@ dependencies = [
 [[package]]
 name = "tauri-codegen"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54ad2d49fdeab4a08717f5b49a163bdc72efc3b1950b6758245fcde79b645e1a"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "base64 0.21.1",
  "brotli",
@@ -2864,8 +2868,7 @@ dependencies = [
 [[package]]
 name = "tauri-macros"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8eb12a2454e747896929338d93b0642144bb51e0dddbb36e579035731f0d76b7"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "heck 0.4.0",
  "proc-macro2",
@@ -2878,8 +2881,7 @@ dependencies = [
 [[package]]
 name = "tauri-runtime"
 version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "108683199cb18f96d2d4134187bb789964143c845d2d154848dda209191fd769"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "gtk",
  "http",
@@ -2899,8 +2901,7 @@ dependencies = [
 [[package]]
 name = "tauri-runtime-wry"
 version = "0.14.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b7aa256a1407a3a091b5d843eccc1a5042289baf0a43d1179d9f0fcfea37c1b"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "cocoa",
  "gtk",
@@ -2919,8 +2920,7 @@ dependencies = [
 [[package]]
 name = "tauri-utils"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03fc02bb6072bb397e1d473c6f76c953cda48b4a2d0cce605df284aa74a12e84"
+source = "git+https://github.com/tauri-apps/tauri?branch=feat/resources-map#cc1d965066f19a33f5c6a86663849a02b524ce6f"
 dependencies = [
  "brotli",
  "ctor",

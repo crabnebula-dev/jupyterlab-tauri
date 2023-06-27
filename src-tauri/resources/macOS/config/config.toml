@@ -1,0 +1,6 @@
+folders_location = "Desktop"
+math_rendering = "MathJax3"
+git_extensions = "Hidden"
+key_management_strategy = "Keychain"
+keychain_name = "login"
+key_dir_string = ""
