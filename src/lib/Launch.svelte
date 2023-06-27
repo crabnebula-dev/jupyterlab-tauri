@@ -3,7 +3,7 @@
   import { Circle } from "svelte-loading-spinners";
   import logo from "./assets/jupyterlab-wordmark.svg";
 
-  const areas = ["Setup and Signatures", "Authoring", "Reading"];
+  const areas = ["Setup and Signatures", "Authoring", "Readings"];
   const projects = {
     "Setup and Signatures": ["Quick Start", "Signatures", "Shared Libraries"],
     Authoring: ["Scratchpad"],
@@ -12,12 +12,22 @@
 
   let area = "";
   let project = "";
+  let launching = false;
 
   async function launch() {
     try {
+      launching = true;
       await invoke("launch", { area, project });
     } catch (e) {
       alert(e);
+    } finally {
+      launching = false;
+    }
+  }
+
+  $: {
+    if (area) {
+      project = "";
     }
   }
 </script>
@@ -26,6 +36,7 @@
   <div class="logo">
     <img alt="JupyterLab Logo" width="300" src={logo} />
   </div>
+
   <div class="main">
     <select class="input" bind:value={area}>
       {#each areas as areaName}
@@ -43,8 +54,20 @@
       {/if}
     </select>
 
-    <button on:click={launch} disabled={!(area && project)}>Launch</button>
+    <button
+      class="launch"
+      on:click={launch}
+      disabled={!(area && project && !launching)}>Launch</button
+    >
   </div>
+
+  {#if launching}
+    <div class="circle">
+      <span>
+        <Circle size="20" />
+      </span>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -78,5 +101,15 @@
     display: flex;
     flex-direction: column;
     flex: 1;
+  }
+
+  .circle {
+    display: flex;
+    margin-bottom: 3rem;
+  }
+
+  .circle span {
+    display: inline-block;
+    margin: 0 auto;
   }
 </style>

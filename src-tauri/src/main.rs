@@ -6,7 +6,6 @@
 use std::{
     collections::HashMap,
     env::current_exe,
-    fs::create_dir_all,
     path::{Path, PathBuf, MAIN_SEPARATOR},
     process::{Child, Command},
     sync::Mutex,
@@ -18,6 +17,8 @@ use tauri::{
     api::http::{ClientBuilder, HttpRequestBuilder},
     AppHandle, Manager, RunEvent, State, Window, WindowBuilder,
 };
+
+mod installer;
 
 struct JupyterProcess {
     child: Child,
@@ -71,6 +72,8 @@ async fn do_launch(
 ) -> Result<()> {
     // we run the installer only on the `init` window for security
     if window.label() == "init" {
+        let installed = installer::install_if_needed(app.path_resolver())?;
+
         let port = portpicker::pick_unused_port()
             .ok_or_else(|| anyhow::anyhow!("failed to pick unused port"))?;
         let token = rand::random::<usize>().to_string();
@@ -87,7 +90,11 @@ async fn do_launch(
         .spawn()
         .map_err(|e| anyhow::anyhow!("failed to run launcher: {e}"))?;
 
-        std::thread::sleep(std::time::Duration::from_secs(2));
+        std::thread::sleep(std::time::Duration::from_secs(if installed {
+            8
+        } else {
+            3
+        }));
         let _ = WindowBuilder::new(
             &app,
             rand::thread_rng()
@@ -155,68 +162,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![launch])
         .manage(JupyterProcessStore(Default::default()))
         .setup(|app| {
-            if let Some(home) = tauri::api::path::home_dir() {
-                let gennaker_path = home.join("Library").join("GennakerTauri");
-
-                let path_resolver = app.path_resolver();
-                let projects_path = gennaker_path.join("projects");
-                let libraries_path = gennaker_path.join("jupyter-libraries");
-
-                let gpython_framework_path = gpython_framework_path()?;
-
-                let options = fs_extra::dir::CopyOptions::new();
-                if !projects_path.exists() {
-                    create_dir_all(&projects_path)?;
-
-                    let venv_projects_script = path_resolver
-                        .resolve_resource("venv-projects.sh")
-                        .expect("failed to resolve venv-projects.sh");
-                    for (area, project) in [
-                        ("Setup and Signatures", "Shared Libraries"),
-                        ("Authoring", "Scratchpad"),
-                        ("Readings", "Symbolic Math"),
-                    ] {
-                        let project_path = projects_path.join(area).join(project);
-                        create_dir_all(&project_path)?;
-                        let _ = Command::new(&venv_projects_script)
-                            .env("GPYTHON_FRAMEWORK_PATH", &gpython_framework_path)
-                            .current_dir(&project_path)
-                            .status();
-                    }
-                }
-
-                if !gennaker_path.join("config").exists() {
-                    fs_extra::copy_items(
-                        &vec![path_resolver.resolve_resource("config").unwrap()],
-                        &gennaker_path,
-                        &options,
-                    )?;
-                }
-
-                if !libraries_path.exists() {
-                    fs_extra::copy_items(
-                        &vec![path_resolver.resolve_resource("jupyter-libraries").unwrap()],
-                        &gennaker_path,
-                        &options,
-                    )?;
-
-                    let _ = Command::new(
-                        path_resolver
-                            .resolve_resource("venv-libraries.sh")
-                            .expect("failed to resolve venv-libraries.sh"),
-                    )
-                    .env("GPYTHON_FRAMEWORK_PATH", &gpython_framework_path)
-                    .env(
-                        "PIP_LINKS_PATH",
-                        path_resolver
-                            .resolve_resource("5_packed")
-                            .expect("failed to resolve 5_packed"),
-                    )
-                    .current_dir(&libraries_path)
-                    .status();
-                }
-            }
-
             WindowBuilder::new(app, "init", Default::default())
                 .title("JupyterLab")
                 .build()?;
