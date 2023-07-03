@@ -7,27 +7,29 @@ use std::{
     collections::HashMap,
     env::current_exe,
     path::{Path, PathBuf, MAIN_SEPARATOR},
-    process::{Child, Command},
     sync::Mutex,
 };
 
 use anyhow::Result;
 use rand::{distributions::Alphanumeric, Rng};
 use tauri::{
-    api::http::{ClientBuilder, HttpRequestBuilder},
+    api::{
+        http::{ClientBuilder, HttpRequestBuilder},
+        process::{Command, CommandChild, CommandEvent},
+    },
     AppHandle, Manager, RunEvent, State, Window, WindowBuilder,
 };
 
 mod installer;
 
 struct JupyterProcess {
-    child: Child,
+    child: CommandChild,
     port: u16,
     token: String,
 }
 
 impl JupyterProcess {
-    pub async fn stop(mut self) -> Result<()> {
+    pub async fn stop(self) -> Result<()> {
         #[cfg(not(windows))]
         {
             let client = ClientBuilder::new().build()?;
@@ -72,29 +74,55 @@ async fn do_launch(
 ) -> Result<()> {
     // we run the installer only on the `init` window for security
     if window.label() == "init" {
-        let installed = installer::install_if_needed(app.path_resolver())?;
+        installer::install_if_needed(app.path_resolver())?;
 
         let port = portpicker::pick_unused_port()
             .ok_or_else(|| anyhow::anyhow!("failed to pick unused port"))?;
         let token = rand::random::<usize>().to_string();
 
-        let child = Command::new(
+        let mut env = HashMap::new();
+        env.insert(
+            "GPYTHON_FRAMEWORK_PATH".to_string(),
+            gpython_framework_path()?.to_string_lossy().to_string(),
+        );
+        let (mut rx, child) = Command::new(
             app.path_resolver()
                 .resolve_resource("launch.sh")
-                .ok_or_else(|| anyhow::anyhow!("failed to find resource"))?,
+                .ok_or_else(|| anyhow::anyhow!("failed to find resource"))?
+                .to_string_lossy(),
         )
         .args([&area, &project])
         .args([&token])
         .args([port.to_string()])
-        .env("GPYTHON_FRAMEWORK_PATH", gpython_framework_path()?)
+        .envs(env)
         .spawn()
         .map_err(|e| anyhow::anyhow!("failed to run launcher: {e}"))?;
 
-        std::thread::sleep(std::time::Duration::from_secs(if installed {
-            8
-        } else {
-            3
-        }));
+        while let Some(event) = rx.recv().await {
+            match &event {
+                CommandEvent::Stderr(message) => {
+                    eprintln!("{message}");
+                }
+                CommandEvent::Stdout(message) => {
+                    println!("{message}");
+                }
+                CommandEvent::Error(e) => {
+                    anyhow::bail!("failed to run launcher: {e}")
+                }
+                CommandEvent::Terminated(c) => {
+                    let code = c.code.unwrap_or_default();
+                    anyhow::bail!("launcher exited with status code {code}")
+                }
+                _ => (),
+            }
+
+            if let CommandEvent::Stderr(message) | CommandEvent::Stdout(message) = event {
+                if message.contains("is running at") {
+                    break;
+                }
+            }
+        }
+
         let _ = WindowBuilder::new(
             &app,
             rand::thread_rng()
@@ -115,7 +143,7 @@ async fn do_launch(
             .0
             .lock()
             .unwrap()
-            .insert(child.id(), JupyterProcess { child, port, token });
+            .insert(child.pid(), JupyterProcess { child, port, token });
 
         Ok(())
     } else {

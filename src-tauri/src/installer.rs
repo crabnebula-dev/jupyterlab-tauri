@@ -38,7 +38,7 @@ fn exec_admin<E: AsRef<Path>, A: AsRef<OsStr>>(executable: E, args: &[A]) -> Res
     Ok(())
 }
 
-pub fn install_if_needed(path_resolver: PathResolver) -> Result<bool> {
+pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
     if let Some(home) = home_dir() {
         let gennaker_path = home.join("Library").join("GennakerTauri");
 
@@ -115,9 +115,7 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<bool> {
                 )?;
             }
         }
-
-        Ok(should_install_venv)
-    } else {
-        Ok(false)
     }
+
+    Ok(())
 }
