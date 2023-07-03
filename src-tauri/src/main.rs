@@ -7,7 +7,6 @@ use std::{
     collections::HashMap,
     env::current_exe,
     path::{Path, PathBuf, MAIN_SEPARATOR},
-    sync::Mutex,
 };
 
 use anyhow::Result;
@@ -17,6 +16,7 @@ use tauri::{
         http::{ClientBuilder, HttpRequestBuilder},
         process::{Command, CommandChild, CommandEvent},
     },
+    async_runtime::Mutex,
     AppHandle, Manager, RunEvent, State, Window, WindowBuilder,
 };
 
@@ -142,7 +142,7 @@ async fn do_launch(
         store
             .0
             .lock()
-            .unwrap()
+            .await
             .insert(child.pid(), JupyterProcess { child, port, token });
 
         Ok(())
@@ -202,8 +202,8 @@ fn main() {
             if let RunEvent::Exit = event {
                 // stop the JupyterLab server on app exit
                 let store = app.state::<JupyterProcessStore>();
-                let _ = tauri::async_runtime::block_on(async move {
-                    let mut store_ = store.0.lock().unwrap();
+                tauri::async_runtime::block_on(async move {
+                    let mut store_ = store.0.lock().await;
                     let keys = store_.keys().cloned().collect::<Vec<u32>>();
                     for k in keys {
                         let _ = store_.remove(&k).unwrap().stop().await;

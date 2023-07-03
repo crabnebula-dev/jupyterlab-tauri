@@ -29,10 +29,8 @@ fn exec_admin<E: AsRef<Path>, A: AsRef<OsStr>>(executable: E, args: &[A]) -> Res
         args,
         AuthorizationFlags::DEFAULTS,
     )?;
-    for line in std::io::BufReader::new(file).lines() {
-        if let Ok(s) = line {
-            println!("{}", s);
-        }
+    for line in std::io::BufReader::new(file).lines().flatten() {
+        println!("{}", line);
     }
     auth.destroy_rights();
     Ok(())
@@ -70,7 +68,7 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
 
         if !gennaker_path.join("config").exists() {
             fs_extra::copy_items(
-                &vec![path_resolver.resolve_resource("config").unwrap()],
+                &[path_resolver.resolve_resource("config").unwrap()],
                 &gennaker_path,
                 &options,
             )?;
@@ -78,7 +76,7 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
 
         if !libraries_exist {
             fs_extra::copy_items(
-                &vec![path_resolver.resolve_resource("jupyter-libraries").unwrap()],
+                &[path_resolver.resolve_resource("jupyter-libraries").unwrap()],
                 &gennaker_path,
                 &options,
             )?;
@@ -107,7 +105,7 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
                 let target = projects_path.join(venv_target_path).join(".v");
                 create_dir_all(&target)?;
                 fs_extra::copy_items(
-                    &vec![path_resolver
+                    &[path_resolver
                         .resolve_resource(format!("venvs/{venv_resource_path}/.venv"))
                         .unwrap()],
                     target,
