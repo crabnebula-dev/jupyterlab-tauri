@@ -44,27 +44,40 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
         let libraries_path = gennaker_path.join("jupyter-libraries");
         let projects_exist = projects_path.exists();
         let libraries_exist = libraries_path.exists();
-        let should_install_venv = !(projects_exist && libraries_exist);
+
+        let mut projects = HashMap::new();
+        projects.insert(
+            "Setup and Signatures",
+            vec!["Quick Start", "Signatures", "Shared Libraries"],
+        );
+        projects.insert("Authoring", vec!["Scratchpad"]);
+        projects.insert("Readings", vec!["Symbolic Math"]);
 
         let options = fs_extra::dir::CopyOptions::new();
-        if !projects_exist {
+        let venv_exists = if !projects_exist {
             create_dir_all(&projects_path)?;
 
-            let mut projects = HashMap::new();
-            projects.insert(
-                "Setup and Signatures",
-                vec!["Quick Start", "Signatures", "Shared Libraries"],
-            );
-            projects.insert("Authoring", vec!["Scratchpad"]);
-            projects.insert("Readings", vec!["Symbolic Math"]);
-
-            for (area, project_list) in projects {
+            for (area, project_list) in &projects {
                 for project in project_list {
                     let project_path = projects_path.join(area).join(project);
                     create_dir_all(&project_path)?;
                 }
             }
-        }
+
+            false
+        } else {
+            let mut exists = true;
+            for (area, project_list) in &projects {
+                for project in project_list {
+                    let project_path = projects_path.join(area).join(project);
+                    if !project_path.join(".v").join(".venv").exists() {
+                        exists = false;
+                        break;
+                    }
+                }
+            }
+            exists
+        };
 
         if !gennaker_path.join("config").exists() {
             fs_extra::copy_items(
@@ -82,7 +95,7 @@ pub fn install_if_needed(path_resolver: PathResolver) -> Result<()> {
             )?;
         }
 
-        if should_install_venv {
+        if !(venv_exists && libraries_exist) {
             std::env::set_var("GPYTHON_FRAMEWORK_PATH", gpython_framework_path()?);
             std::env::set_var(
                 "PIP_LINKS_PATH",
