@@ -71,7 +71,9 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
 
       - name: install constructor
-        run: conda install -c conda-forge constructor
+        run: |
+          conda install -c conda-forge constructor
+          constructor -h
 
       - name: downgrade pillow (Windows only)
         if: matrix.platform == 'windows-latest'
