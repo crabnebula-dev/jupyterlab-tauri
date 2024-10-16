@@ -91,9 +91,9 @@ jobs:
           conda install -c conda-forge constructor
           constructor -h
 
-      - name: downgrade pillow (Windows only)
-        if: matrix.cfg.os == 'windows-latest'
-        run: conda install -c conda-forge pillow=9.0.0
+      #- name: downgrade pillow (Windows only)
+      #  if: matrix.cfg.os == 'windows-latest'
+      #  run: conda install -c conda-forge pillow=9.0.0
 
       - name: Install frontend dependencies
         run: yarn install
