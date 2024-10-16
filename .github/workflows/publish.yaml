@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - { os: ubuntu-22.04, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py38_22.11.1-1-Linux-x86_64.sh" }
+          - { os: ubuntu-20.04, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py38_22.11.1-1-Linux-x86_64.sh" }
           - { os: macos-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-MacOSX-arm64.sh" }
           - { os: windows-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Windows-x86_64.exe" }
 
@@ -136,7 +136,7 @@ jobs:
   publish-release:
     permissions:
       contents: write
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: [create_release, create_packages]
 
     steps:
