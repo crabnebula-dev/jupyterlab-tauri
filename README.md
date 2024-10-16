@@ -22,7 +22,7 @@ The application installs JupyterLab on its own Python environment. The env path 
   <details>
     <summary>Windows 10 requirement</summary>
     
-    For some reason on Windows 10 the pillow package crashes on a missing _imagine DLL. So you will have to change the pillow version manually with the following command:
+    For some reason on Windows 10 the pillow package crashes on a missing _imagine_ DLL. So you will have to change the pillow version manually with the following command:
     
     ```bash
     conda install -c conda-forge pillow=9.0.0
