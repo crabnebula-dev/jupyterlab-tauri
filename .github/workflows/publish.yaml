@@ -40,9 +40,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-20.04, windows-latest]
+        os: [macos-latest, ubuntu-20.04, windows-latest]
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        # needed for conda to work
+        shell: bash -el {0}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -62,13 +68,18 @@ jobs:
           cache-dependency-path: v2/package-lock.json
 
       - name: Install apt dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt install -y --no-install-recommends libwebkit2gtk-4.0-dev
 
       - name: install conda
         uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          auto-activate-base: true
+          activate-environment: ""
+          channels: conda-forge
 
       - name: install constructor
         run: |
@@ -76,7 +87,7 @@ jobs:
           constructor -h
 
       - name: downgrade pillow (Windows only)
-        if: matrix.platform == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         run: conda install -c conda-forge pillow=9.0.0
 
       - name: Install frontend dependencies
@@ -86,7 +97,7 @@ jobs:
         run: yarn build
 
       - name: Setup api key file
-        if: matrix.platform.os == 'macos-latest'
+        if: matrix.os == 'macos-latest'
         run: echo "${{ secrets.APPLE_API_KEY }}" > $RUNNER_TEMP/AuthKey.p8
 
       - name: Build the app
@@ -100,7 +111,7 @@ jobs:
           APPLE_API_KEY_PATH: "$RUNNER_TEMP/AuthKey.p8"
 
       - name: Remove api key file
-        if: matrix.platform.os == 'macos-latest'
+        if: matrix.os == 'macos-latest'
         run: rm $RUNNER_TEMP/AuthKey.p8
 
       - name: Find release binary
