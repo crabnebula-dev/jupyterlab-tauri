@@ -40,9 +40,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        cfg:
+        - { os: ubuntu-22.04, conda_installer_url: https://repo.anaconda.com/miniconda/Miniconda3-py38_22.11.1-1-Linux-x86_64.sh }
+        - { os: macos-latest, conda_installer_url: https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-MacOSX-arm64.sh }
+        - { os: windows-latest, conda_installer_url: https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Windows-x86_64.exe }
         os: [macos-latest, ubuntu-20.04, windows-latest]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.cfg.os }}
 
     defaults:
       run:
@@ -68,7 +72,7 @@ jobs:
           cache-dependency-path: v2/package-lock.json
 
       - name: Install apt dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-20.04'
+        if: matrix.cfg.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt install -y --no-install-recommends libwebkit2gtk-4.0-dev
@@ -76,6 +80,7 @@ jobs:
       - name: install conda
         uses: conda-incubator/setup-miniconda@v3
         with:
+          installer-url: ${{ matrix.conda_installer_url }}
           auto-update-conda: true
           auto-activate-base: true
           activate-environment: ""
@@ -87,7 +92,7 @@ jobs:
           constructor -h
 
       - name: downgrade pillow (Windows only)
-        if: matrix.os == 'windows-latest'
+        if: matrix.cfg.os == 'windows-latest'
         run: conda install -c conda-forge pillow=9.0.0
 
       - name: Install frontend dependencies
@@ -97,7 +102,7 @@ jobs:
         run: yarn build
 
       - name: Setup api key file
-        if: matrix.os == 'macos-latest'
+        if: matrix.cfg.os == 'macos-latest'
         run: echo "${{ secrets.APPLE_API_KEY }}" > $RUNNER_TEMP/AuthKey.p8
 
       - name: Build the app
@@ -111,7 +116,7 @@ jobs:
           APPLE_API_KEY_PATH: "$RUNNER_TEMP/AuthKey.p8"
 
       - name: Remove api key file
-        if: matrix.os == 'macos-latest'
+        if: matrix.cfg.os == 'macos-latest'
         run: rm $RUNNER_TEMP/AuthKey.p8
 
       - name: Find release binary
