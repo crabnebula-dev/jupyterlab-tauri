@@ -41,9 +41,9 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-        - { os: ubuntu-22.04, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py38_22.11.1-1-Linux-x86_64.sh" }
-        - { os: macos-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-MacOSX-arm64.sh" }
-        - { os: windows-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Windows-x86_64.exe" }
+          - { os: ubuntu-22.04, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py38_22.11.1-1-Linux-x86_64.sh" }
+          - { os: macos-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-MacOSX-arm64.sh" }
+          - { os: windows-latest, conda_installer_url: "https://repo.anaconda.com/miniconda/Miniconda3-py39_22.11.1-1-Windows-x86_64.exe" }
         os: [macos-latest, ubuntu-20.04, windows-latest]
 
     runs-on: ${{ matrix.cfg.os }}
