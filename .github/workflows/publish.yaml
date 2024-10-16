@@ -102,7 +102,7 @@ jobs:
 
       - name: Setup api key file
         if: matrix.cfg.os == 'macos-latest'
-        run: mkdir src-tauri/private_keys && echo "${{ secrets.APPLE_API_KEY }}" > src-tauri/private_keys/AuthKey.p8
+        run: echo "${{ secrets.APPLE_API_KEY }}" > $RUNNER_TEMP/AuthKey.p8
 
       - name: Build the app
         run: yarn tauri build -vvv
@@ -112,11 +112,11 @@ jobs:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_KEY_PATH: "private_keys/AuthKey.p8"
+          APPLE_API_KEY_PATH: "$RUNNER_TEMP/AuthKey.p8"
 
       - name: Remove api key file
         if: matrix.cfg.os == 'macos-latest'
-        run: rm src-tauri/private_keys/AuthKey.p8
+        run: rm $RUNNER_TEMP/AuthKey.p8
 
       - name: Find release binary
         id: find_release_binary
