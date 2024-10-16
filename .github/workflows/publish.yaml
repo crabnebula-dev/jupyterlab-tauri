@@ -102,7 +102,7 @@ jobs:
 
       - name: Setup api key file
         if: matrix.cfg.os == 'macos-latest'
-        run: echo "${{ secrets.APPLE_API_KEY }}" > $RUNNER_TEMP/AuthKey.p8
+        run: echo "${{ secrets.APPLE_API_KEY_ID }}" > $RUNNER_TEMP/AuthKey.p8
 
       - name: Build the app
         run: yarn tauri build -vvv
